@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Into life Prototype</title>
+<style>
+  :root{
+    --bg:#0d0f12; --panel:#15181d; --panel2:#1d2128; --text:#f4f6f8;
+    --muted:#9da5b1; --line:#2a3039; --accent:#f3f4f6;
+    --green:#dff7e8; --greenText:#163a25;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:#08090b;color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  }
+  .shell{min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:24px 12px}
+  .phone{
+    width:min(100%,430px); min-height:840px; background:var(--bg);
+    border:1px solid #242932; border-radius:28px; overflow:hidden;
+    box-shadow:0 24px 80px rgba(0,0,0,.45); position:relative;
+  }
+  .status{display:flex;justify-content:space-between;padding:14px 20px 6px;color:#cbd0d7;font-size:12px}
+  .progress{height:3px;background:#242a31;margin:0 20px}
+  .progress i{display:block;height:100%;background:#f1f3f5;width:0;transition:.25s}
+  .screen{display:none;padding:20px 20px 112px;min-height:780px}
+  .screen.active{display:block}
+  .brand{font-size:15px;letter-spacing:.08em;font-weight:700;color:#d7dce3;margin-bottom:36px}
+  .hero{padding-top:64px}
+  .kicker{font-size:12px;color:#aeb5bf;letter-spacing:.14em;margin-bottom:14px}
+  .bigcopy{font-size:42px;line-height:1.08;font-weight:800;letter-spacing:-.05em;margin-bottom:18px}
+  h1,h2,h3{margin:0}
+  h2{font-size:28px;line-height:1.25;letter-spacing:-.02em}
+  h3{font-size:18px;line-height:1.4}
+  p{color:var(--muted);line-height:1.7;margin:0}
+  .bottom{
+    position:absolute;left:0;right:0;bottom:0;padding:18px 20px 22px;
+    background:linear-gradient(180deg,rgba(13,15,18,0),rgba(13,15,18,.95) 28%,var(--bg) 55%);
+  }
+  button{
+    width:100%;border:0;border-radius:16px;padding:17px 18px;
+    font-size:16px;font-weight:700;cursor:pointer;
+  }
+  .primary{background:var(--accent);color:#111318}
+  .secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  .ghost{background:transparent;color:#d7dce3;border:1px solid var(--line)}
+  .back{width:auto;padding:8px 0;background:transparent;color:#b6bec8;font-weight:600;font-size:14px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .label{font-size:13px;color:#d5d9df;margin:20px 0 10px;font-weight:650}
+  .group{margin-top:18px}
+  .options{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{
+    width:auto;padding:11px 14px;border-radius:999px;background:var(--panel);
+    border:1px solid var(--line); color:#cfd4db;font-size:14px;font-weight:600;
+  }
+  .chip.selected{background:#f1f3f5;color:#111318;border-color:#f1f3f5}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:14px}
+  .card.featured{background:#f1f3f5;color:#111318}
+  .card.featured p,.card.featured .meta,.card.featured .summary{color:#555d66}
+  .tag{font-size:11px;letter-spacing:.14em;font-weight:800;margin-bottom:10px}
+  .title{font-size:24px;line-height:1.35;font-weight:800;margin:6px 0 10px;letter-spacing:-.02em}
+  .summary{font-size:14px;line-height:1.65;color:#b2bac4}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;color:#adb4be;font-size:13px;margin-top:14px}
+  .meta div{background:rgba(255,255,255,.045);border-radius:10px;padding:9px 10px}
+  .featured .meta div{background:rgba(0,0,0,.055)}
+  .fine{font-size:12px;color:#7f8791;margin-top:12px;line-height:1.6}
+  .smallbtn{margin-top:12px}
+  .result{
+    background:linear-gradient(160deg,#f4f5f7,#d9dee5); color:#111318;
+    border-radius:24px; padding:24px; margin-top:22px;
+  }
+  .result p{color:#4d5661}
+  .badge{
+    display:inline-block;padding:8px 12px;border-radius:999px;background:#111318;color:#f4f6f8;
+    font-size:12px;font-weight:800;letter-spacing:.12em;margin-bottom:12px;
+  }
+  .mission{
+    margin-top:24px;border:1px solid var(--line);background:var(--panel);border-radius:22px;padding:20px;
+  }
+  .mission .stamp{font-size:11px;letter-spacing:.18em;color:#98a1ad;font-weight:800}
+  .mission .time{font-size:30px;font-weight:800;margin:10px 0 4px}
+  .mission .place{font-size:18px;font-weight:700}
+  .divider{height:1px;background:var(--line);margin:18px 0}
+  .list{display:grid;gap:11px;color:#d7dbe1;font-size:14px}
+  .note{background:#181b20;border-radius:14px;padding:14px;color:#afb7c1;font-size:13px;line-height:1.65;margin-top:16px}
+  .success{margin-top:86px;background:var(--green);color:var(--greenText);border-radius:24px;padding:24px}
+  .check{font-size:42px;margin-bottom:10px}
+  .rating{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+  .rating button{padding:12px 0;border-radius:12px;background:var(--panel2);color:#fff;border:1px solid var(--line)}
+  .rating button.selected{background:#f1f3f5;color:#111318}
+  .spacer{height:8px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="phone">
+    <div class="status"><span>19:52</span><span>◉ ◉ ▰</span></div>
+    <div class="progress"><i id="bar"></i></div>
+
+    <section class="screen active" data-step="0">
+      <div class="brand">Into life</div>
+      <div class="hero">
+        <div class="kicker">YOUR NEXT DAY OFF</div>
+        <div class="bigcopy">いつもの休日から、<br>少しだけ外へ。</div>
+        <p>3つの質問に答えるだけ。<br>Into lifeが、あなたの次の休日に合う体験を選びます。</p>
+      </div>
+      <div class="bottom"><button class="primary" onclick="next()">3問のミニ診断をはじめる</button></div>
+    </section>
+
+    <section class="screen" data-step="1">
+      <div class="row"><button class="back" onclick="prev()">← 戻る</button><span style="color:#7f8791;font-size:12px">1 / 4</span></div>
+      <div class="kicker" style="margin-top:18px">MINI DIAGNOSIS</div>
+      <h2>今の気分を、<br>3つだけ教えてください。</h2>
+      <p>細かい登録はしません。今の休日に合う提案を出すための最小限です。</p>
+
+      <div class="group">
+        <div class="label">Q1. 今の休日、どっちに近い？</div>
+        <div class="options single" data-group="mood">
+          <button class="chip selected" data-value="rest">ゆっくりしたい</button>
+          <button class="chip" data-value="active">何かしたい</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Q2. 今日はどんな刺激がほしい？</div>
+        <div class="options single" data-group="stimulus">
+          <button class="chip" data-value="people">人</button>
+          <button class="chip selected" data-value="place">場所</button>
+          <button class="chip" data-value="experience">体験</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Q3. どこまで未知でも大丈夫？</div>
+        <div class="options single" data-group="unknown">
+          <button class="chip selected" data-value="safe">安心寄り</button>
+          <button class="chip" data-value="mid">ちょい未知</button>
+          <button class="chip" data-value="high">かなり未知</button>
+        </div>
+      </div>
+
+      <div class="bottom"><button class="primary" onclick="showResult()">診断結果を見る</button></div>
+    </section>
+
+    <section class="screen" data-step="2">
+      <div class="row"><button class="back" onclick="prev()">← 戻る</button><span style="color:#7f8791;font-size:12px">2 / 4</span></div>
+      <div class="kicker" style="margin-top:18px">YOUR TYPE</div>
+      <h2>今日のあなたは、<br><span id="typeName">ちょい外出探索タイプ</span>です。</h2>
+      <div class="result">
+        <div class="badge" id="typeBadge">LIGHT EXPLORE</div>
+        <h3 id="typeCatch">少しだけ外に出て、気分を切り替えたい日。</h3>
+        <div class="spacer"></div>
+        <p id="typeDesc">完全にランダムすぎる体験より、安心感がありつつ新しさもある提案の方が合っています。</p>
+      </div>
+
+      <div class="label">最後に、参加しやすさだけ設定</div>
+      <div class="options single" data-group="budget">
+        <button class="chip">〜1,000円</button>
+        <button class="chip selected">〜2,000円</button>
+        <button class="chip">〜3,000円</button>
+      </div>
+
+      <div class="label">使える時間</div>
+      <div class="options single" data-group="time">
+        <button class="chip">2時間</button>
+        <button class="chip selected">半日</button>
+        <button class="chip">1日</button>
+      </div>
+
+      <div class="label">絶対NG</div>
+      <div class="options multi">
+        <button class="chip">激しい運動</button>
+        <button class="chip">虫</button>
+        <button class="chip">大人数</button>
+        <button class="chip">屋外</button>
+      </div>
+
+      <div class="bottom"><button class="primary" onclick="next()">あなた向けの3つを見る</button></div>
+    </section>
+
+    <section class="screen" data-step="3">
+      <div class="row"><button class="back" onclick="prev()">← 戻る</button><span style="color:#7f8791;font-size:12px">3 / 4</span></div>
+      <div class="kicker" style="margin-top:18px">PICKED FOR YOU</div>
+      <h2>そんなあなたに、<br>この3つ。</h2>
+      <p>全部は明かしません。ですが、ジャンル・時間・費用など、参加判断に必要な情報は先に分かります。</p>
+
+      <div class="card featured">
+        <div class="tag">FOR YOU</div>
+        <div class="title">知らない誰かと、<br>まだ知らない価値観に出会う午後。</div>
+        <div class="summary">今のあなたの興味に近いテーマで、普段なら会わない人と話しながら新しい視点に触れる体験。</div>
+        <div class="meta">
+          <div>🧭 ジャンル：交流・発見</div><div>📍 名古屋市内</div>
+          <div>⏱ 約3時間</div><div>💴 1,000円</div>
+          <div>👥 4〜6人</div><div>🚶 運動：ほぼなし</div>
+          <div>👕 服装：普段着</div><div>🏠 屋内中心</div>
+        </div>
+        <button class="secondary smallbtn" onclick="choose('for_you')">これに行く</button>
+      </div>
+
+      <div class="card">
+        <div class="tag">DISCOVER</div>
+        <div class="title">普段なら選ばないものを、<br>自分の手でつくる午後。</div>
+        <div class="summary">ものづくり系の体験。何を作るかはまだ秘密ですが、最後に“形に残るもの”を持ち帰ります。</div>
+        <div class="meta">
+          <div>🧭 ジャンル：ものづくり</div><div>📍 名古屋から30分</div>
+          <div>⏱ 約3.5時間</div><div>💴 1,500円</div>
+          <div>👥 少人数</div><div>🚶 運動：軽め</div>
+          <div>👕 汚れてもOK</div><div>🌤 屋内＋一部屋外</div>
+        </div>
+        <button class="ghost smallbtn" onclick="choose('discover')">これに行く</button>
+      </div>
+
+      <div class="card">
+        <div class="tag">OUT OF ROUTINE</div>
+        <div class="title">いつもより少し早く起きて、<br>まだ知らない街の朝を見る。</div>
+        <div class="summary">普段行かない場所を歩き、その場所ならではの人・景色・食べ物に出会う小さな冒険。</div>
+        <div class="meta">
+          <div>🧭 ジャンル：街・探索</div><div>📍 名古屋近郊</div>
+          <div>⏱ 約4時間</div><div>💴 1,200円</div>
+          <div>👤 1人参加OK</div><div>🚶 運動：歩く程度</div>
+          <div>👕 歩きやすい服</div><div>🌤 屋外中心</div>
+        </div>
+        <button class="ghost smallbtn" onclick="choose('explore')">これに行く</button>
+      </div>
+
+      <div class="fine">※ 具体的な活動内容や当日の仕掛けは一部秘密です。ジャンル・時間・費用・運動量・服装・屋内外など、参加判断に必要な情報は事前に確認できます。</div>
+    </section>
+
+    <section class="screen" data-step="4">
+      <div class="row"><button class="back" onclick="prev()">← 戻る</button><span style="color:#7f8791;font-size:12px">4 / 4</span></div>
+      <div class="kicker" style="margin-top:18px">YOUR MISSION</div>
+      <h2 id="missionTitle">知らない誰かと、まだ知らない価値観に出会う午後。</h2>
+      <div class="mission">
+        <div class="stamp">MISSION DETAILS</div>
+        <div class="time">13:00 — 16:00</div>
+        <div class="place">名古屋市内・駅から徒歩10分以内</div>
+        <div class="divider"></div>
+        <div class="list" id="missionList">
+          <div>💴 参加費：<b>1,000円</b></div>
+          <div>🧭 ジャンル：交流・発見</div>
+          <div>👥 4〜6人程度</div>
+          <div>👕 普段着でOK</div>
+          <div>🚶 運動量：ほぼなし</div>
+          <div>🏠 屋内中心</div>
+        </div>
+      </div>
+      <div class="note"><b>まだ秘密のこと</b><br>何をするか、誰に会うか、最後に何が起こるか。<br>ただし、事前に登録したNG条件に当たる内容は出しません。</div>
+      <div class="bottom">
+        <button class="primary" onclick="book()">この体験を予約する</button>
+        <button class="ghost" style="margin-top:8px" onclick="goTo(3)">やっぱり選び直す</button>
+      </div>
+    </section>
+
+    <section class="screen" data-step="5">
+      <div class="brand">Into life</div>
+      <div class="success">
+        <div class="check">✓</div>
+        <h2 style="color:inherit;margin-bottom:6px">MISSION ACCEPTED</h2>
+        <p style="color:#31513e">あなたの次の休日が決まりました。</p>
+      </div>
+      <div class="mission">
+        <div class="stamp">SUNDAY</div>
+        <div class="time">13:00</div>
+        <div class="place">集合場所は前日に通知します。</div>
+      </div>
+
+      <div class="label">この条件なら、本当に参加してみたいですか？</div>
+      <div class="rating">
+        <button onclick="rate(this)">1</button>
+        <button onclick="rate(this)">2</button>
+        <button onclick="rate(this)">3</button>
+        <button onclick="rate(this)">4</button>
+        <button onclick="rate(this)">5</button>
+      </div>
+      <div class="fine">1 = 参加したくない　5 = 本当に参加したい</div>
+
+      <div class="bottom"><button class="secondary" onclick="restart()">最初から試す</button></div>
+    </section>
+  </div>
+</div>
+
+<script>
+let step = 0;
+let choice = 'for_you';
+const screens = [...document.querySelectorAll('.screen')];
+const bar = document.getElementById('bar');
+
+function render(){
+  screens.forEach((s,i)=>s.classList.toggle('active', i===step));
+  const widths = ['0%','20%','40%','65%','85%','100%'];
+  bar.style.width = widths[step] || '0%';
+  window.scrollTo(0,0);
+}
+function next(){ if(step < 5){ step++; render(); } }
+function prev(){ if(step > 0){ step--; render(); } }
+function goTo(n){ step=n; render(); }
+function restart(){ step=0; render(); }
+
+function getSelected(group){
+  const el = document.querySelector(`[data-group="${group}"] .chip.selected`);
+  return el ? el.dataset.value || el.textContent.trim() : '';
+}
+
+function showResult(){
+  const mood = getSelected('mood');
+  const stimulus = getSelected('stimulus');
+  const unknown = getSelected('unknown');
+
+  const typeName = document.getElementById('typeName');
+  const typeBadge = document.getElementById('typeBadge');
+  const typeCatch = document.getElementById('typeCatch');
+  const typeDesc = document.getElementById('typeDesc');
+
+  if(mood === 'rest' && stimulus === 'place'){
+    typeName.textContent = 'ちょい外出探索タイプ';
+    typeBadge.textContent = 'LIGHT EXPLORE';
+    typeCatch.textContent = '少しだけ外に出て、気分を切り替えたい日。';
+    typeDesc.textContent = '完全にランダムすぎる体験より、安心感がありつつ新しさもある提案の方が合っています。';
+  }else if(stimulus === 'people'){
+    typeName.textContent = 'ゆる交流発見タイプ';
+    typeBadge.textContent = 'SOCIAL DISCOVER';
+    typeCatch.textContent = '新しい人や会話から刺激を受けたい日。';
+    typeDesc.textContent = '共通点のある人と、普段は出会わない話題に触れられる体験が相性良さそうです。';
+  }else if(stimulus === 'experience'){
+    typeName.textContent = '手を動かす体験タイプ';
+    typeBadge.textContent = 'HANDS-ON';
+    typeCatch.textContent = '見るだけより、自分でやる方が満足しやすい日。';
+    typeDesc.textContent = '受け身の時間より、少しだけ挑戦して自分の中に何かが残る体験が向いています。';
+  }else if(unknown === 'high'){
+    typeName.textContent = '未知ジャンプタイプ';
+    typeBadge.textContent = 'JUMP OUT';
+    typeCatch.textContent = '少しの不確実さも、面白さとして受け止められる日。';
+    typeDesc.textContent = '行き先や内容にちょっとした意外性がある方が、記憶に残る休日になりそうです。';
+  }else{
+    typeName.textContent = 'ちょい外出探索タイプ';
+    typeBadge.textContent = 'LIGHT EXPLORE';
+    typeCatch.textContent = '少しだけ外に出て、気分を切り替えたい日。';
+    typeDesc.textContent = '完全にランダムすぎる体験より、安心感がありつつ新しさもある提案の方が合っています。';
+  }
+
+  step = 2;
+  render();
+}
+
+function choose(c){
+  choice = c;
+  const title = document.getElementById('missionTitle');
+  const time = document.querySelector('.mission .time');
+  const place = document.querySelector('.mission .place');
+  const list = document.getElementById('missionList');
+
+  if(c === 'discover'){
+    title.textContent = '普段なら選ばないものを、自分の手でつくる午後。';
+    time.textContent = '13:00 — 16:30';
+    place.textContent = '名古屋から電車で約30分・駅から徒歩圏内';
+    list.innerHTML = `
+      <div>💴 参加費：<b>1,500円</b></div>
+      <div>🧭 ジャンル：ものづくり</div>
+      <div>👥 少人数</div>
+      <div>👕 汚れてもよい服装</div>
+      <div>🚶 運動量：軽め</div>
+      <div>🌤 屋内＋一部屋外</div>`;
+  } else if(c === 'explore'){
+    title.textContent = 'いつもより少し早く起きて、まだ知らない街の朝を見る。';
+    time.textContent = '08:00 — 12:00';
+    place.textContent = '名古屋近郊・電車で45分以内';
+    list.innerHTML = `
+      <div>💴 参加費：<b>1,200円</b></div>
+      <div>🧭 ジャンル：街・探索</div>
+      <div>👤 1人参加OK</div>
+      <div>👕 歩きやすい服装</div>
+      <div>🚶 運動量：歩く程度</div>
+      <div>🌤 屋外中心</div>`;
+  } else {
+    title.textContent = '知らない誰かと、まだ知らない価値観に出会う午後。';
+    time.textContent = '13:00 — 16:00';
+    place.textContent = '名古屋市内・駅から徒歩10分以内';
+    list.innerHTML = `
+      <div>💴 参加費：<b>1,000円</b></div>
+      <div>🧭 ジャンル：交流・発見</div>
+      <div>👥 4〜6人程度</div>
+      <div>👕 普段着でOK</div>
+      <div>🚶 運動量：ほぼなし</div>
+      <div>🏠 屋内中心</div>`;
+  }
+  step = 4;
+  render();
+}
+function book(){ step = 5; render(); }
+function rate(el){
+  document.querySelectorAll('.rating button').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+document.querySelectorAll('.single').forEach(group=>{
+  group.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      group.querySelectorAll('.chip').forEach(x=>x.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+});
+document.querySelectorAll('.multi .chip').forEach(btn=>{
+  btn.addEventListener('click', ()=>btn.classList.toggle('selected'));
+});
+
+render();
+</script>
+</body>
+</html>
